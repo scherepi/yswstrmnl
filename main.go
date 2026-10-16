@@ -81,7 +81,7 @@ func main() {
 		dashboard["slack"] = func() any { return slackManager.Stats() }
 		mux.HandleFunc("GET /slack", func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]any{"channels": slackManager.Stats()})
+			json.NewEncoder(w).Encode(slackManager.Stats())
 		})
 	}
 

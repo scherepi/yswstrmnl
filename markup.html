@@ -2,29 +2,25 @@
 <script src="https://trmnl.com/js/highcharts/12.3.0/highcharts.js"></script>
 <script src="https://trmnl.com/js/chartkick/5.0.1/chartkick.min.js"></script>
 
-<!-- markup with empty, ID'd element for chart injection -->
-<div class="view">
-  <div class="layout layout--col gap--space-between">
-    <div class="grid grid--cols-2">
-      <div id="chart-123" class=""></div>
-      <div class="item">
-        <div class="meta"></div>
-        <div class="content">
-          <span class="value value--tnums">{{ airtable.weighted_projects_this_month }}</span>
-          <span class="label">Weighted Projects This Month</span>
-        </div>
+<!-- markup with empty, ID'd element for chart injection. no <div class="view"> wrapper,
+     TRMNL adds its own around this -->
+<div class="layout layout--col gap--space-between">
+  <div class="grid grid--cols-2">
+    <div id="chart-123" class=""></div>
+    <div class="item">
+      <div class="meta"></div>
+      <div class="content">
+        <span class="value value--tnums">{{ airtable.weighted_projects_this_month }}</span>
+        <span class="label">Weighted Projects This Month</span>
       </div>
-      
     </div>
-
-    
   </div>
+</div>
 
-  <div class="title_bar">
-    <img class="image" src="/images/plugins/simple-analytics--render.svg" alt="Simple Analytics Logo">
-    <span class="title">{{event_name}}</span>
-    <span class="instance">YSWS Dashboard</span>
-  </div>
+<div class="title_bar">
+  <img class="image" src="/images/plugins/simple-analytics--render.svg" alt="Simple Analytics Logo">
+  <span class="title">{{ event_name }}</span>
+  <span class="instance">YSWS Dashboard</span>
 </div>
 
 <script type="text/javascript">
@@ -62,6 +58,8 @@
         points: false,
         colors: [linePaint],
         curve: true,
+        // a day's gain needs the day before it too, so the first day has nothing to plot
+        messages: { empty: "Daily chart starts after 2 days of data" },
         // options() supplies the adaptive grid + label paint; layer the
         // chart-specific overrides on top with merge().
         library: TRMNLCharts.merge(TRMNLCharts.options({ el: el }), {

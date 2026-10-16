@@ -231,15 +231,26 @@ func (s *SlackManager) Run(ctx context.Context) error {
 	return nil
 }
 
-// Stats returns a snapshot of every tracked channel, in config order.
-func (s *SlackManager) Stats() []ChannelStats {
+// SlackStats is the totals across every tracked channel.
+type SlackStats struct {
+	Members  int  `json:"members"`  // the biggest channel's, since most people are in all of them
+	Messages int  `json:"messages"` // top-level messages
+	Replies  int  `json:"replies"`  // thread replies (including ones also sent to the channel)
+	Ready    bool `json:"ready"`    // false until every channel's history backfill finishes
+}
+
+// Stats returns the totals across every tracked channel.
+func (s *SlackManager) Stats() SlackStats {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	out := make([]ChannelStats, 0, len(s.channels))
-	for _, id := range s.channels {
-		out = append(out, *s.stats[id])
+	total := SlackStats{Ready: true}
+	for _, st := range s.stats {
+		total.Members = max(total.Members, st.Members)
+		total.Messages += st.Messages
+		total.Replies += st.Replies
+		total.Ready = total.Ready && st.Ready
 	}
-	return out
+	return total
 }
 
 // join adds the bot to the channel if it isn't in it yet, since it only gets
