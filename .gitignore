@@ -1,0 +1,4 @@
+.env
+*.db
+config.toml
+weighted_history.json

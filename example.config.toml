@@ -1,0 +1,27 @@
+# This is an EXAMPLE CONFIG for the YSWS TRMNL plugin. The server looks for "config.toml," this will not work.
+[general]
+event_name = "Your YSWS"
+auth_header = "Your auth token for TRMNL" # can be anything, just make sure you set it in the private plugin options
+
+[airtable]
+enabled = true
+api_key = "" # personal access token with data.records:read on the Unified YSWS Projects DB
+# program = "Your YSWS" # optional, your program's Name in the Unified DB's YSWS Programs table. defaults to event_name
+# refresh_minutes = 15 # optional. each refresh is one API call
+[slack]
+enabled = true
+app_token = "your app's app token" # MUST have connections:write
+bot_token = "xoxb-your bot token"
+
+# channel IDs (C0123456789), not names. the bot has to be in each one.
+channels = [""]
+
+[plausible]
+enabled = true
+api_key = "your api key"
+# domains exactly as they're named in plausible
+sites = ["example.hackclub.com"]
+# optional, these are the defaults
+# metrics = ["visitors", "pageviews"]
+# date_range = "7d" # or "day", "30d", "month", "all", etc.
+# base_url = "https://plausible.io" # change this if you're self-hosting

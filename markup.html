@@ -1,0 +1,86 @@
+<!-- import Highcharts + Chartkick libraries -->
+<script src="https://trmnl.com/js/highcharts/12.3.0/highcharts.js"></script>
+<script src="https://trmnl.com/js/chartkick/5.0.1/chartkick.min.js"></script>
+
+<!-- markup with empty, ID'd element for chart injection -->
+<div class="view">
+  <div class="layout layout--col gap--space-between">
+    <div class="grid grid--cols-2">
+      <div id="chart-123" class=""></div>
+      <div class="item">
+        <div class="meta"></div>
+        <div class="content">
+          <span class="value value--tnums">{{ airtable.weighted_projects_this_month }}</span>
+          <span class="label">Weighted Projects This Month</span>
+        </div>
+      </div>
+      
+    </div>
+
+    
+  </div>
+
+  <div class="title_bar">
+    <img class="image" src="/images/plugins/simple-analytics--render.svg" alt="Simple Analytics Logo">
+    <span class="title">{{event_name}}</span>
+    <span class="instance">YSWS Dashboard</span>
+  </div>
+</div>
+
+<script type="text/javascript">
+  // Weighted–Total at the end of each day, e.g. {"2026-10-15": 1220.5, "2026-10-16": 1234.57}
+  // null if TRMNL didn't get anything from the server
+  var totals = {{ airtable.history | json }} || {};
+  // the last 30 days, each as how much Weighted–Total went up since the day before
+  var days = Object.keys(totals).sort().slice(-31);
+  var data = days.slice(1).map(function (day, i) {
+    return [day, Math.round((totals[day] - totals[days[i]]) * 100) / 100];
+  });
+
+  // Wait for Chartkick and the framework TRMNLCharts helper (bundled in the
+  // plugin runtime), then read adaptive paint from the live screen.
+  function whenReady(cb) {
+    var tries = 0;
+    (function attempt() {
+      if (window.TRMNLCharts && window.Chartkick) return cb();
+      if (++tries > 200) return;
+      setTimeout(attempt, 50);
+    })();
+  }
+
+  whenReady(function () {
+    var el = "chart-123";
+    // watch() rebuilds on device/scale/mode/dark/theme change; series() picks the paint
+    // for each plotted line.
+    TRMNLCharts.watch(el, function () {
+      var px = function (value) { return TRMNLPaint.px(value, { el: el }); };
+      var linePaint = TRMNLCharts.series(0, 1, { el: el });
+      return new Chartkick.LineChart(el, data, {
+        adapter: "highcharts", // chartjs, google, etc available
+        prefix: "",
+        thousands: ",",
+        points: false,
+        colors: [linePaint],
+        curve: true,
+        // options() supplies the adaptive grid + label paint; layer the
+        // chart-specific overrides on top with merge().
+        library: TRMNLCharts.merge(TRMNLCharts.options({ el: el }), {
+          chart: { height: px(260) },
+          plotOptions: { series: { lineWidth: px(4) } },
+          yAxis: {
+            gridLineDashStyle: "shortdot",
+            tickAmount: 5
+          },
+          xAxis: {
+            type: "datetime",
+            lineWidth: 0,
+            gridLineDashStyle: "dot",
+            tickWidth: 1,
+            tickLength: 0,
+            tickPixelInterval: px(120)
+          }
+        })
+      });
+    });
+  });
+</script>
